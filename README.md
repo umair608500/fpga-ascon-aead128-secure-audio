@@ -2,7 +2,7 @@
 
 ![SystemVerilog](https://img.shields.io/badge/HDL-SystemVerilog-blue)
 ![FPGA](https://img.shields.io/badge/FPGA-Zybo%20Z7--10-red)
-![Simulation](https://img.shields.io/badge/Simulation-ModelSim-orange)
+![Simulation](https://img.shields.io/badge/Simulation-Vivado%20XSim-orange)
 ![Standard](https://img.shields.io/badge/NIST-SP%20800--232%20(Ascon)-green)
 ![Status](https://img.shields.io/badge/Status-In%20progress-yellow)
 
@@ -93,7 +93,7 @@ flowchart LR
     class MIC,CODECA,ETHA,ETHB,CODECB,HP,KEM,DEC planned;
 ```
 
-**Implemented so far:** the Ascon-AEAD128 encryption core (`ascon_top` and its sub-modules), a C reference model, and a ModelSim verification environment.
+**Implemented so far:** the Ascon-AEAD128 encryption core (`ascon_top` and its sub-modules), a C reference model, and a Vivado XSim verification environment.
 
 ---
 
@@ -262,7 +262,7 @@ Instead of instantiating the full 320-bit S-box layer, the engine processes **on
 | Level | Method | Status |
 |---|---|---|
 | Algorithm | C reference implementation checked against the official Ascon test vectors | ✅ Done |
-| RTL (functional) | ModelSim simulation of `ascon_top` against **1,065 known-answer test vectors** | ✅ Done |
+| RTL (functional) | Vivado XSim simulation of `ascon_top` against **1,065 known-answer test vectors** | ✅ Done |
 | Edge cases | Partial-word padding (0–8 valid bytes) and transitions between associated data and plaintext | ✅ Covered by the vectors |
 | Hardware | Encryption module synthesised on FPGA | ✅ Synthesis OK |
 | Hardware integration | Full-system test with audio on two boards | ⏳ Planned |
@@ -273,8 +273,8 @@ Outputs (ciphertext and tag) are compared against expected values from the test-
 
 | Testbench | Purpose |
 |---|---|
-| `tb/<testbench_1>.sv` | *(describe: for example, top-level KAT test against the vector file)* |
-| `tb/<testbench_2>.sv` | *(describe: for example, permutation or padder unit test)* |
+| `Ascon.srcs/sim_1/new/tb_ascon.sv` (module `tb_ascon`) | Directed top-level test of `ascon_top` |
+| `Ascon.srcs/sim_1/new/tb_ascon2.sv` (module `tb_kat`) | Known-answer test: runs the vectors in `sim/test_vectors/kat.mem` and compares ciphertext and tag |
 
 *(Add a waveform screenshot to `docs/images/waveform.png` and reference it here.)*
 
@@ -282,16 +282,29 @@ Outputs (ciphertext and tag) are compared against expected values from the test-
 
 ## 11. FPGA Implementation Results
 
-**Target board:** Digilent Zybo Z7-10 (Xilinx Zynq-7000)
-**Tool:** *(for example, Vivado, add version)*
+**Target board:** Digilent Zybo Z7-10 (Xilinx Zynq-7000, XC7Z010)
+**Tool:** Vivado *(add version)*
+
+### Resource utilisation (post-synthesis, `ascon_top`)
+
+| Resource | `ascon_top` (total) | `ascon_permutation` | Device capacity | Utilisation |
+|---|---|---|---|---|
+| Slice LUTs | 1,274 | 938 | 17,600 | ~7% |
+| Slice registers (flip-flops) | 734 | 334 | 35,200 | ~2% |
+| F7 muxes | 1 | 1 | 8,800 | <1% |
+| BRAM / DSP | 0 / 0 | 0 / 0 | – | 0% |
+
+The serial permutation engine accounts for most of the logic (938 of 1,274 LUTs); the rest is the AEAD controller FSM and the padder.
+
+> The I/O count reported when `ascon_top` is synthesised on its own (527 bonded IOBs) reflects its wide 64/128-bit ports and is **not** a cost of the core. In the final system these ports connect to internal logic, not to package pins.
+
+### Timing and latency
 
 | Metric | Result |
 |---|---|
-| LUTs | *(fill in from utilisation report)* |
-| Flip-flops | *(fill in)* |
-| BRAM / DSP | *(fill in)* |
 | Max clock frequency (post-implementation) | *(fill in)* |
-| Cycles per 128-bit block (simulation) | *(fill in)* |
+| Cycles per 128-bit data block, p8 (simulation) | *(fill in)* |
+| Cycles for initialisation / finalisation, p12 (simulation) | *(fill in)* |
 | End-to-end audio latency | *(to be measured)* |
 
 ---
@@ -351,9 +364,9 @@ Outputs (ciphertext and tag) are compared against expected values from the test-
 | Category | Tool / Technology |
 |---|---|
 | HDL | SystemVerilog |
-| Simulation | ModelSim |
+| Simulation | Vivado Simulator (XSim) |
 | FPGA board | Digilent Zybo Z7-10 (Xilinx Zynq-7000) |
-| Synthesis / implementation | *(Vivado, add version)* |
+| Synthesis / implementation | Vivado *(add version)* |
 | Reference model | C |
 | Audio codec | SSM2603 (I²S) |
 | Cryptography | Ascon-AEAD128 (NIST SP 800-232), ML-KEM (NIST FIPS 203) |
@@ -365,43 +378,42 @@ Outputs (ciphertext and tag) are compared against expected values from the test-
 
 ```
 fpga-ascon-aead128-secure-audio/
-├── rtl/
-│   ├── ascon_top.sv
-│   ├── ascon_permutation.sv
-│   ├── ascon_pS.sv
-│   ├── ascon_pL.sv
-│   └── ascon_padder.sv
-├── tb/
-│   ├── <testbench_1>.sv
-│   └── <testbench_2>.sv
+├── Ascon.xpr                      # Vivado project (open this file)
+├── Ascon.srcs/
+│   ├── sources_1/new/             # RTL design sources
+│   │   ├── ascon_top.sv
+│   │   ├── ascon_permutation.sv
+│   │   ├── ascon_pS.sv
+│   │   ├── ascon_pL.sv
+│   │   └── ascon_padder.sv
+│   └── sim_1/new/                 # testbenches
+│       ├── tb_ascon.sv
+│       └── tb_ascon2.sv           # known-answer test (tb_kat)
 ├── sim/
-│   └── test_vectors/          # known-answer test vector file(s)
-├── c_reference/               # C implementation verified against official vectors
+│   └── test_vectors/
+│       └── kat.mem                # known-answer test vectors
+├── c_reference/                   # C implementation verified against official vectors
 ├── docs/
 │   ├── progress_report.pdf
 │   └── images/
-├── constraints/               # .xdc pin constraints (to be added)
+├── constraints/                   # .xdc pin constraints (to be added)
 ├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
+> Vivado-generated folders (`Ascon.cache`, `Ascon.runs`, `Ascon.sim`, `Ascon.hw`, `Ascon.ip_user_files`) are intentionally not tracked; Vivado recreates them when the project is opened and run.
+
 ---
 
 ## 17. Getting Started
 
-### Simulation (ModelSim)
+### Simulation (Vivado XSim)
 
-```bash
-# compile
-vlog -sv rtl/ascon_pS.sv rtl/ascon_pL.sv rtl/ascon_padder.sv \
-         rtl/ascon_permutation.sv rtl/ascon_top.sv tb/<testbench_1>.sv
-
-# run
-vsim -c work.<testbench_top_module> -do "run -all; quit"
-```
-
-*(Adjust file order and module names to match your testbenches and where the test-vector file is read from.)*
+1. Open `Ascon.xpr` in Vivado.
+2. Make sure `sim/test_vectors/kat.mem` is added as a simulation source (**Add Sources → Add or create simulation sources**, untick "Copy sources into project" if you want it to stay in `sim/test_vectors/`).
+3. In **Simulation Settings**, set the simulation top module to `tb_kat` (known-answer test) or `tb_ascon` (directed test).
+4. Click **Run Simulation → Run Behavioral Simulation** and check the Tcl console for the pass/fail summary.
 
 ### Synthesis
 
