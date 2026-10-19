@@ -1,0 +1,95 @@
+# ==========================================================
+#  .gitignore - SystemVerilog / ModelSim / Vivado (Zybo Z7-10)
+# ==========================================================
+
+# ---- ModelSim / Questa ----
+work/
+*.wlf
+*.vcd
+*.fst
+transcript
+vsim.wlf
+modelsim.ini
+*.mpf
+*.mti
+*.cr.mti
+*.vstf
+qrun.out/
+vish_stacktrace.vstf
+
+# ---- Vivado generated output ----
+.Xil/
+*.jou
+*.log
+*.str
+*.debug
+*.backup.jou
+*.backup.log
+webtalk*
+*.xpe
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.gen/
+*.sdk/
+*.dcp
+*.rpt
+*.pb
+*.ltx
+*_stub.v
+*_stub.vhdl
+vivado*.backup.*
+hs_err_pid*
+
+# ---- Bitstreams (publish them under GitHub Releases instead) ----
+*.bit
+*.bin
+*.mcs
+*.xsa
+*.hwdef
+
+# ---- C reference model build output ----
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+build/
+a.out
+
+# ---- Python (if used for test-vector scripts) ----
+__pycache__/
+*.pyc
+.venv/
+
+# ---- Generated simulation output (uncomment to keep results out of git) ----
+# *.txt
+# output/
+
+# ---- OS / editor files ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ---- Keep these source files (override rules above) ----
+!*.sv
+!*.svh
+!*.v
+!*.vh
+!*.xdc
+!*.xpr
+!*.tcl
+!*.c
+!*.h
+!*.md
+!*.pdf
+!docs/**
+!sim/test_vectors/**
