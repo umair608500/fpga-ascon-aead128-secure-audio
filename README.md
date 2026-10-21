@@ -276,7 +276,6 @@ Outputs (ciphertext and tag) are compared against expected values from the test-
 | `Ascon.srcs/sim_1/new/tb_ascon.sv` (module `tb_ascon`) | Directed top-level test of `ascon_top` |
 | `Ascon.srcs/sim_1/new/tb_ascon2.sv` (module `tb_kat`) | Known-answer test: runs the vectors in `sim/test_vectors/kat.mem` and compares ciphertext and tag |
 
-*(Add a waveform screenshot to `docs/images/waveform.png` and reference it here.)*
 
 ---
 
@@ -366,7 +365,7 @@ The serial permutation engine accounts for most of the logic (938 of 1,274 LUTs)
 | HDL | SystemVerilog |
 | Simulation | Vivado Simulator (XSim) |
 | FPGA board | Digilent Zybo Z7-10 (Xilinx Zynq-7000) |
-| Synthesis / implementation | Vivado *(add version)* |
+| Synthesis / implementation | Vivado |
 | Reference model | C |
 | Audio codec | SSM2603 (I²S) |
 | Cryptography | Ascon-AEAD128 (NIST SP 800-232), ML-KEM (NIST FIPS 203) |
