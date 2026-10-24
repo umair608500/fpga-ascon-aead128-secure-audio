@@ -297,15 +297,6 @@ The serial permutation engine accounts for most of the logic (938 of 1,274 LUTs)
 
 > The I/O count reported when `ascon_top` is synthesised on its own (527 bonded IOBs) reflects its wide 64/128-bit ports and is **not** a cost of the core. In the final system these ports connect to internal logic, not to package pins.
 
-### Timing and latency
-
-| Metric | Result |
-|---|---|
-| Max clock frequency (post-implementation) | *(fill in)* |
-| Cycles per 128-bit data block, p8 (simulation) | *(fill in)* |
-| Cycles for initialisation / finalisation, p12 (simulation) | *(fill in)* |
-| End-to-end audio latency | *(to be measured)* |
-
 ---
 
 ## 12. Design Considerations
